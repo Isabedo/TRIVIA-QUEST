@@ -1,159 +1,93 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
-    //singleton
+    public static GameManager Instance { get; private set; }
 
-    public static GameManager Instance;
+    [Header("Component References")]
+    [SerializeField] private TurnController turnController;
+    [SerializeField] private EndScreenUI endScreenUI;
 
-    //Revisar si ya esta creado
-    public void Awake()
+    public enum GameState
     {
-        if (Instance == null)
+        MainMenu,
+        Gameplay,
+        GameOver
+    }
+
+    public GameState CurrentState { get; private set; }
+
+    // La lista de jugadores ahora es privada para cumplir con la encapsulación.
+    // Otros scripts podrán leerla, pero solo el GameManager podrá modificarla.
+    private List<PlayerData> players = new List<PlayerData>();
+    
+    // Propiedad pública de solo lectura para acceder a la lista de jugadores de forma segura.
+    public IReadOnlyList<PlayerData> Players => players;
+    
+    private PlayerData gameWinner;
+
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
-    [Header("Reglas")]
-
-    public int pointsPerCompleted = 1;
-    public float QuestionsTime = 10f;
-    public Difficulty currentDifficulty = Difficulty.Easy;
-
-    public bool IsPlaying = false;
-    
-
-    private List<PlayerData> players = new List<PlayerData>(); //lista de jugadores
-    private int currentTurnIndex = 0;
-
-    public Question CurrentQuestion = null;
-    public float CurrentTime = 0f;
-
-    private void Update()
+    private void Start()
     {
-        if (IsPlaying == false)
-        {
-            return;
-        }
-        if (CurrentQuestion == null)
-        {
-            return;
-        }
-        if (CurrentTime > 0f)
-        {
-            CurrentTime -= Time.deltaTime;
-            if (CurrentTime <= 0f)
-            {
-                YouLoose();
-            }
-        }
-    }
-    public bool AddPlayer(string name)
-    {
-        if (IsPlaying == true)
-        {
-            return false;
-        }
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return false;
-        }
-        if (players.Count >= 4)
-        {
-            return false;
-        }
-        players.Add(new PlayerData(name.Trim()));
-        return true;
-    }
-    public void ClearPlayer()
-    {
-        if (IsPlaying == true)
-        {
-            return;
-        }
-        players.Clear();
-
-    }
-    public bool CanStart()
-    {
-        if (players.Count < 2)
-        {
-            return false;
-        }
-        return true;
-    }
-    public void StartGame()
-    {
-        if (CanStart() == false)
-        {
-            return;
-        }
-        IsPlaying = true;
-        currentTurnIndex = 0;
-
-        //aqui iria el que va a seleccionar los retos de manera aleatoria
+        // El juego siempre empieza en el menú principal.
+        ChangeState(GameState.MainMenu);
     }
 
-    //Hacer por aca los codigos que permita avanzar de pregunta
-
-    private void EndTurnAdvance()
+    public void StartGame(List<PlayerData> playerList)
     {
-        if (players.Count < 2)
-        {
-            return;
-        }
-        currentTurnIndex += 1;
-        if (currentTurnIndex >= players.Count)
-        {
-            currentTurnIndex = 0;
-        }
-
-        //metodo que cambia la pregunta
-    }
-    public void ApplyCompleted()
-    {
-        if (IsPlaying == false)
-        {
-            return;
-        }
-        if (players.Count == 0)
-        {
-            return;
-        }
-        PlayerData cur = players[currentTurnIndex];
-        if (CurrentQuestion != null)
-        {
-            cur.score += pointsPerCompleted;
-        }
-        //metodo de avanzar la pregunta
-    }
-    public void YouLoose()
-    {
-        if (IsPlaying == false)
-        {
-            return;
-        }
-        //metodo de avanzar la pregunta
-    }
-    public int GetPlayerCount()
-    {
-        return players.Count;
+        // Se crea una nueva lista para evitar problemas de referencias con la lista temporal de la UI.
+        players = new List<PlayerData>(playerList);
+        gameWinner = null;
+        ChangeState(GameState.Gameplay);
     }
 
-    public PlayerData GetPlayer(int index)
+    public void EndGame(PlayerData winner)
     {
-        if (index < 0 || index >= players.Count)
+        gameWinner = winner;
+        ChangeState(GameState.GameOver);
+    }
+
+    private void ChangeState(GameState newState)
+    {
+        if (CurrentState == newState) return;
+
+        CurrentState = newState;
+        
+        switch (CurrentState)
         {
-            return null;
+            case GameState.MainMenu:
+                Debug.Log("Game State: Main Menu");
+                // Limpiamos la lista de jugadores por si se está reiniciando una partida.
+                players.Clear();
+                break;
+                
+            case GameState.Gameplay:
+                Debug.Log("Game State: Gameplay Started!");
+                // Prepara el banco de preguntas.
+                QuestionController.Instance.PrepareNewGame();
+                // Inicia el sistema de turnos.
+                turnController.StartGame(players);
+                break;
+                
+            case GameState.GameOver:
+                Debug.Log("Game State: Game Over");
+                endScreenUI.Show(gameWinner);
+                break;
         }
-        return players[index];
     }
 }
