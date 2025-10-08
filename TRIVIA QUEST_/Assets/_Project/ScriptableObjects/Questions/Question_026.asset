@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 037540851b8f4c44eb7da43f391ab8c4, type: 3}
+  m_Name: Question_026
+  m_EditorClassIdentifier: 
+  questionText: "\xBFQui\xE9n es considerado el m\xE1ximo exponente del vallenato
+    tradicional?"
+  answers:
+  - Silvestre Dangond
+  - "Diomedes D\xEDaz"
+  - "Peter Manjarr\xE9s"
+  - Carlos Vives
+  correctAnswerIndex: 1

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 037540851b8f4c44eb7da43f391ab8c4, type: 3}
+  m_Name: Question_069
+  m_EditorClassIdentifier: 
+  questionText: "\xBFCompleta: \u201CTell me why\u2019d you have to go and make things
+    so complicated?\u201D"
+  answers:
+  - "\u201CI see the way you act like you\u2019re somebody else\u201D"
+  - "\u201CYou always hide behind your fame\u201D"
+  - "\u201CYou\u2019re not the same since you changed\u201D"
+  - "\u201CIt\u2019s like I never knew your name\u201D"
+  correctAnswerIndex: 0
