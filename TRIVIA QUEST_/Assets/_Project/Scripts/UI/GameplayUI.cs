@@ -11,6 +11,10 @@ public class GameplayUI : MonoBehaviour
     [Header("UI Panels")]
     [SerializeField] private GameObject gameplayPanel;
 
+    [Header("Timer Settings")]
+    [SerializeField] private float timeLimit = 10f; // segundos por pregunta
+    [SerializeField] private TMP_Text timerText;    // referencia al texto del tiempo
+    private bool isTiming = false;
 
     [Header("UI Elements")]
     [SerializeField] private TMP_Text questionText;
@@ -57,12 +61,14 @@ public class GameplayUI : MonoBehaviour
             answerButtonImages[i].color = defaultColor;
             answerButtons[i].interactable = true;
         }
-        
+        isTiming = true;
+        StartCoroutine(StartTimer());
         gameplayPanel.SetActive(true);
     }
 
     private void SelectAnswer(int selectedIndex)
     {
+        isTiming = false;
         // Deshabilitar todos los botones para evitar múltiples clics
         foreach (var button in answerButtons)
         {
@@ -74,6 +80,43 @@ public class GameplayUI : MonoBehaviour
         StartCoroutine(ShowFeedbackAndNotify(selectedIndex, isCorrect));
     }
 
+    private IEnumerator StartTimer()
+    {
+        float timeRemaining = timeLimit;
+
+        while (timeRemaining > 0)
+        {
+            timerText.text = $"{Mathf.CeilToInt(timeRemaining)}s";
+            yield return new WaitForSeconds(1f);
+
+            // Si el jugador respondió, detener el temporizador
+            if (!isTiming)
+                yield break;
+
+            timeRemaining -= 1f;
+        }
+
+        // Si el tiempo llega a 0
+        TimeExpired();
+    }
+    private void TimeExpired()
+    {
+        isTiming = false;
+
+        foreach (var button in answerButtons)
+            button.interactable = false;
+
+        timerText.text = "¡Tiempo agotado!";
+        answerButtonImages[currentQuestion.correctAnswerIndex].color = correctColor;
+
+        StartCoroutine(NotifyTimeout());
+    }
+
+    private IEnumerator NotifyTimeout()
+    {
+        yield return new WaitForSeconds(feedbackDelay);
+        OnAnswerSelected?.Invoke(-1); // -1 indica que no respondió
+    }
     private IEnumerator ShowFeedbackAndNotify(int selectedIndex, bool isCorrect)
     {
         // Si la respuesta fue incorrecta...
@@ -93,4 +136,5 @@ public class GameplayUI : MonoBehaviour
         // Disparar el evento para que el sistema de turnos sepa que se ha respondido.
         OnAnswerSelected?.Invoke(selectedIndex);
     }
+
 }
