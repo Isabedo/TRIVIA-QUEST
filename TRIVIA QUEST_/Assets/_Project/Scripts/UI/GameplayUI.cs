@@ -10,6 +10,8 @@ public class GameplayUI : MonoBehaviour
 
     [Header("UI Panels")]
     [SerializeField] private GameObject gameplayPanel;
+    [SerializeField] private GameObject correctPanel;
+    [SerializeField] private GameObject incorrectPanel;
 
     [Header("Timer Settings")]
     [SerializeField] private float timeLimit = 10f; // segundos por pregunta
@@ -19,6 +21,7 @@ public class GameplayUI : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private TMP_Text questionText;
     [SerializeField] private TMP_Text currentPlayerText;
+    [SerializeField] private TMP_Text currentPlayerScore;
     [SerializeField] private Button[] answerButtons;
 
     [Header("Feedback Colors")]
@@ -46,14 +49,18 @@ public class GameplayUI : MonoBehaviour
         }
 
         gameplayPanel.SetActive(false);
+        correctPanel.SetActive(false);
+        incorrectPanel.SetActive(false);
     }
 
-    public void DisplayQuestion(Question question, string playerName)
+    public void DisplayQuestion(Question question, string playerName, int actualPlayer)
     {
         currentQuestion = question;
         
         questionText.text = currentQuestion.questionText;
         currentPlayerText.text = $"Turno de: {playerName}";
+        currentPlayerScore.text = $"{actualPlayer}";
+
 
         for (int i = 0; i < answerButtons.Length; i++)
         {
@@ -106,34 +113,57 @@ public class GameplayUI : MonoBehaviour
         foreach (var button in answerButtons)
             button.interactable = false;
 
-        timerText.text = "¡Tiempo agotado!";
+        // Mostrar visualmente la respuesta correcta
         answerButtonImages[currentQuestion.correctAnswerIndex].color = correctColor;
 
-        StartCoroutine(NotifyTimeout());
+        StartCoroutine(ShowTimeoutFeedback());
     }
 
-    private IEnumerator NotifyTimeout()
+    private IEnumerator ShowTimeoutFeedback()
     {
         yield return new WaitForSeconds(feedbackDelay);
-        OnAnswerSelected?.Invoke(-1); // -1 indica que no respondió
+
+        gameplayPanel.SetActive(false);
+        incorrectPanel.SetActive(true);
+        timerText.text = "¡Tiempo agotado!";
+
+        yield return new WaitForSeconds(feedbackDelay + 0.5f);
+
+        incorrectPanel.SetActive(false);
+        OnAnswerSelected?.Invoke(-1);
     }
     private IEnumerator ShowFeedbackAndNotify(int selectedIndex, bool isCorrect)
     {
-        // Si la respuesta fue incorrecta...
+        
         if (!isCorrect)
-        {
-            // ...pintar de rojo el botón que se seleccionó.
             answerButtonImages[selectedIndex].color = incorrectColor;
-        }
 
-        // Siempre pintar de verde el botón con la respuesta correcta.
-        // Si el jugador acertó, este será el mismo botón que el de arriba.
         answerButtonImages[currentQuestion.correctAnswerIndex].color = correctColor;
 
-        // Esperar un momento para que el jugador vea los colores.
+        
         yield return new WaitForSeconds(feedbackDelay);
 
-        // Disparar el evento para que el sistema de turnos sepa que se ha respondido.
+        
+        gameplayPanel.SetActive(false);
+
+        
+        if (isCorrect)
+        {
+            correctPanel.SetActive(true);
+        }
+        else
+        {
+            incorrectPanel.SetActive(true);
+        }
+
+        
+        yield return new WaitForSeconds(feedbackDelay + 0.5f);
+
+        
+        correctPanel.SetActive(false);
+        incorrectPanel.SetActive(false);
+
+        
         OnAnswerSelected?.Invoke(selectedIndex);
     }
 

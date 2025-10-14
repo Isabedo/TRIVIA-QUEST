@@ -1,6 +1,8 @@
-public enum Difficulty
+
+public enum Categoria 
 {
-    Easy,
-    Medium,
-    Hard
+    Alterna,
+    Pop,
+    Reggueaton,
+    Reggae
 }

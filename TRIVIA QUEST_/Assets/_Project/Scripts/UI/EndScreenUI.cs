@@ -42,7 +42,7 @@ public class EndScreenUI : MonoBehaviour
         endScreenPanel.SetActive(true);
     }
 
-    private void OnRestartClicked()
+    public void OnRestartClicked()
     {
         // La forma más robusta de reiniciar un juego es recargar la escena.
         // Esto resetea todos los estados y scripts a su valor inicial.

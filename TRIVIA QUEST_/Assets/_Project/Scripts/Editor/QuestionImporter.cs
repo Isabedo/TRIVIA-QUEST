@@ -33,6 +33,16 @@ public class QuestionImporter
             questionAsset.answers[3] = values[4];
             questionAsset.correctAnswerIndex = int.Parse(values[5]);
 
+            try
+            {
+                questionAsset.categoria = (Categoria)System.Enum.Parse(typeof(Categoria), values[6], true);
+            }
+            catch
+            {
+                Debug.LogWarning($"Línea {i}: Categoría '{values[6]}' no válida. Se asignará 'Alterna' por defecto.");
+                questionAsset.categoria = Categoria.Alterna;
+            }
+
             string assetName = $"Question_{i.ToString("000")}.asset";
             string assetPath = Path.Combine(questionsAssetPath, assetName);
             

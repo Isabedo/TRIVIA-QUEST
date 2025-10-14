@@ -80,7 +80,7 @@ public class TurnController : MonoBehaviour
 
         // Si el juego continúa, obtenemos una pregunta y se la pasamos a la UI.
         currentQuestion = QuestionController.Instance.GetNextQuestion();
-        gameplayUI.DisplayQuestion(currentQuestion, players[currentPlayerIndex].playerName);
+        gameplayUI.DisplayQuestion(currentQuestion, players[currentPlayerIndex].playerName, players[currentPlayerIndex].score);
     }
 
     private void EndGame()

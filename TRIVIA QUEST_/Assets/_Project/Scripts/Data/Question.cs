@@ -10,4 +10,7 @@ public class Question : ScriptableObject
     
     [Range(0, 3)]
     public int correctAnswerIndex;
+
+    public Categoria categoria;
+
 }

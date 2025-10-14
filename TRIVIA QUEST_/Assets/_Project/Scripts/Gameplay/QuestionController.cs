@@ -10,6 +10,8 @@ public class QuestionController : MonoBehaviour
     
     private List<Question> remainingQuestions;
 
+    [SerializeField] private CambiarColor panelColorController;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -43,6 +45,11 @@ public class QuestionController : MonoBehaviour
 
         Question nextQuestion = remainingQuestions[0];
         remainingQuestions.RemoveAt(0);
+
+        if (panelColorController != null && nextQuestion != null)
+        {
+            panelColorController.CambiarColorCategoria(nextQuestion.categoria);
+        }
 
         return nextQuestion;
     }
